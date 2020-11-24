@@ -1,0 +1,37 @@
+#spinner {
+    color: blue;
+}
+
+#title .display-4 {
+    font-size: 2.5rem;
+}
+
+#title h3 {
+    font-size: 1.25rem;
+}
+
+#map {
+    margin: 10px;
+    text-align: center;
+}
+
+.BART-circles {
+    opacity: 0.4;
+    border: 1px solid black;
+}
+
+.BART-circles:hover {
+    cursor: pointer;
+}
+
+#tooltip {
+    text-align: left;
+    padding: 10px;
+    background-color: lightgray;
+    border-radius: ;
+    border: 1px solid black;
+    width: auto;
+    opacity: 0;
+    color: black;
+    position: absolute;
+}
