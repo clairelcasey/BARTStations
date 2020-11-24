@@ -1,5 +1,10 @@
+.hidden {
+    display: none;
+}
+
 #spinner {
     color: blue;
+    display: block;
 }
 
 #title .display-4 {
@@ -24,11 +29,13 @@
     cursor: pointer;
 }
 
+
+
 #tooltip {
     text-align: left;
     padding: 10px;
     background-color: lightgray;
-    border-radius: ;
+    border-radius: 2px;
     border: 1px solid black;
     width: auto;
     opacity: 0;

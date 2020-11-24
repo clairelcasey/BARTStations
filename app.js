@@ -117,12 +117,12 @@ async function getStationsAndDisplay() {
     station.etd = await getDepartureTimes(station.abbr);
   }
   // only get stations where there are ETDs
-  STATIONS = STATIONS.filter( (val) => val.etd);
+  STATIONS = STATIONS.filter((val) => val.etd);
   console.log('final stations', STATIONS);
   $loading.hide();
   const times = await getMostRecentUpdateTime();
-  console.log('times',times);
-  displayTime(times);
+  console.log('times', times);
+  displayTimeAndOptions(times);
   createMap();
 }
 
@@ -130,12 +130,14 @@ $(getStationsAndDisplay);
 // $(createMap);
 
 
-function displayTime(times) {
+function displayTimeAndOptions(times) {
   const $time = $("<h3>")
-  .attr("id","time")
-  .attr("class", "text-muted")
-  .text(`Most Recent Update: ${times.date} at ${times.time}`);
-  $("#title").append($time);
+    .attr("id", "time")
+    .attr("class", "text-muted")
+    .text(`Most Recent Update: ${times.date} at ${times.time}`);
+  $("#time-option-container").prepend($time);
+
+  $("#time-option-container").show();
 }
 
 
@@ -166,7 +168,7 @@ const g = svg.append("g");
 function createMap() {
 
   d3.json("california-counties@1.topojson").then(function (topology) {
-    console.log(topology);
+    // console.log(topology);
 
     g.selectAll(".county")
       .data(topojson.feature(topology, topology.objects.counties).features)
@@ -177,6 +179,7 @@ function createMap() {
       .attr("fill", "grey");
   });
 
+  // Create the circles
   svg.selectAll("BART-circles")
     .data(STATIONS)
     .enter()
@@ -205,8 +208,16 @@ function createMap() {
           .append("span")
           .style("color", "black")
           .attr('class', 'single-etd')
-          .text(` train to ${sta.destination} in ${sta.estimate[0].minutes} minutes`)
-          .append('br')
+          .text(` train to ${sta.destination} in ${sta.estimate[0].minutes} 
+          minutes`);
+
+        if (sta.estimate[0].delay !== "0") {
+          d3.select("#etd")
+            .append("span")
+            .style("color", "red")
+            .text(` (delayed ${sta.estimate[0].delay} minutes)`)
+        }
+        d3.select("#etd").append('br');
       }
       d3.select('#tooltip')
         .style("opacity", "0.8")
@@ -214,8 +225,8 @@ function createMap() {
         .style("left", (evt.pageX + 20) + "px")
         .style("top", (evt.pageY - 20) + "px");
     })
+    // add mouseout event
     .on('mouseout', function (evt, d) {
-      console.log(this)
       $("#etd").empty();
       d3.select(this)
         .style('opacity', '0.4')
@@ -224,4 +235,76 @@ function createMap() {
         .style("opacity", "0")
         .style("display", "none");
     })
+}
+
+
+
+/* Add checkbox updates */
+d3.select("#delayCheckbox").on("change", updateDelay);
+
+function updateDelay() {
+  if (d3.select("#delayCheckbox").property("checked")) {
+    d3.selectAll(".BART-circles")
+      .data(STATIONS)
+      .style("fill", function (d) {
+        return (d.etd.every(val => val.estimate[0].delay === "0")) ? "blue" : "red"
+        //   return "blue"
+        // } else {
+        //   return "red"
+        // }
+      })
+  } else {
+    d3.selectAll(".BART-circles")
+      .data(STATIONS)
+      .style("fill", "blue")
+  }
+}
+
+
+
+
+
+$("#BART-lines").on("click",".dropdown-item", function(evt) {
+  const $button = $(evt.target);
+  const color = $button.attr("id");
+  updateLine(color);
+})
+
+
+function updateLine(color) {
+  const lineDataUpdate = filterByColor(color);
+  d3.selectAll(".BART-circles")
+    .data(STATIONS)
+    .style("fill", color)
+    .style("opacity", function (d) {
+      return (d.show) ? "0.4" : "0"
+    });
+}
+
+
+
+function filterByColor(color) {
+  const stationsFiltered = STATIONS.map(function (val) {
+    for (let destination of val.etd) {
+      console.log('destination', destination);
+      if (destination.estimate[0].color === color) {
+        val.show = true;
+        return val;
+      }
+    }
+    val.show = false;
+    return val;
+  })
+  console.log(stationsFiltered, 'filtered');
+  return stationsFiltered
+}
+
+
+$("#resetBtn").on("click", resetMap);
+
+function resetMap() {
+  d3.selectAll(".BART-circles")
+  .data(STATIONS)
+  .style("fill", "blue")
+  .style("opacity", 0.4);
 }
