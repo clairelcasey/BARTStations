@@ -230,7 +230,7 @@ function createMap() {
       $("#etd").empty();
       d3.select(this)
         .style('opacity', '0.4')
-        .style('r', 5);
+        // .style('r', 5);
       d3.select('#tooltip')
         .style("opacity", "0")
         .style("display", "none");
@@ -240,23 +240,22 @@ function createMap() {
 
 
 /* Add checkbox updates */
-d3.select("#delayCheckbox").on("change", updateDelay);
+let showDelay = false;
+$("#delayCheck").on("click", updateDelay);
+
 
 function updateDelay() {
-  if (d3.select("#delayCheckbox").property("checked")) {
+  showDelay = (showDelay) ? false : true;
+  if (showDelay) {
     d3.selectAll(".BART-circles")
       .data(STATIONS)
-      .style("fill", function (d) {
-        return (d.etd.every(val => val.estimate[0].delay === "0")) ? "blue" : "red"
-        //   return "blue"
-        // } else {
-        //   return "red"
-        // }
+      .style("stroke", function (d) {
+        return (d.etd.every(val => val.estimate[0].delay === "0")) ? "none" : "red"
       })
   } else {
     d3.selectAll(".BART-circles")
       .data(STATIONS)
-      .style("fill", "blue")
+      .style("stroke", "none")
   }
 }
 
@@ -274,10 +273,11 @@ $("#BART-lines").on("click",".dropdown-item", function(evt) {
 function updateLine(color) {
   const lineDataUpdate = filterByColor(color);
   d3.selectAll(".BART-circles")
-    .data(STATIONS)
+    .data(lineDataUpdate)
     .style("fill", color)
-    .style("opacity", function (d) {
-      return (d.show) ? "0.4" : "0"
+    .style("r", 5)
+    .style("display", function (d) {
+      return (d.show) ? "block" : "none"
     });
 }
 
@@ -306,5 +306,58 @@ function resetMap() {
   d3.selectAll(".BART-circles")
   .data(STATIONS)
   .style("fill", "blue")
-  .style("opacity", 0.4);
+  .style("opacity", 0.4)
+  .style("r", 5)
+  .style("display", "block");
+}
+
+
+
+
+
+
+
+$("#BART-lines-by-delay").on("click",".dropdown-item", function(evt) {
+  const $button = $(evt.target);
+  const info = $button.attr("id").split('-');
+  console.log('info',info);
+
+  const color = info[0];//$button.attr("id");
+  const name = info[1];
+  updateLineByDelay(color, name);
+})
+
+
+function updateLineByDelay(color, dirName) {
+  const lineDataUpdate = filterByColorAndDirection(color, dirName);
+  d3.selectAll(".BART-circles")
+    .data(lineDataUpdate)
+    .style("fill", color)
+    .style("display", function (d) {
+      return (d.show) ? "block" : "none"
+    })
+    .style("r", function(d) {
+      if (d.etd[0].estimate[0].minutes === "Leaving") return 2;
+      // console.log(d.etd[0].estimate[0].minutes,"d");
+      return d.etd[0].estimate[0].minutes;
+    });
+}
+
+
+
+function filterByColorAndDirection(color, dirName) {
+  const stationsFiltered = STATIONS.map(function (val) {
+    for (let elem of val.etd) {
+      console.log('elem', elem);
+      if (elem.estimate[0].color === color && elem.destination === dirName) {
+        val.show = true;
+        val.etd = [elem];
+        return val;
+      }
+    }
+    val.show = false;
+    return val;
+  })
+  console.log(stationsFiltered, 'filtered');
+  return stationsFiltered
 }

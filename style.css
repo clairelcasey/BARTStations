@@ -23,6 +23,7 @@
 .BART-circles {
     opacity: 0.4;
     border: 1px solid black;
+    stroke-width: 2px;
 }
 
 .BART-circles:hover {
