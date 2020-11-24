@@ -19,7 +19,7 @@
             <hr>
             <div id="time-option-container" class="hidden">
                 <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                    <button id="delayCheck" type="button" class="btn btn-secondary">Display Delays</button>
+                    <button id="delayCheck" type="button" class="btn btn-secondary">Display Stations with Delays</button>
                     <button id="resetBtn" type="button" class="btn btn-secondary">View All Lines</button>
                     <div class="btn-group" role="group">
                         <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
@@ -31,23 +31,26 @@
                             <button class="dropdown-item" id="RED">Red</button>
                             <button class="dropdown-item" id="BLUE">Blue</button>
                             <button class="dropdown-item" id="ORANGE">Orange</button>
+                            <button class="dropdown-item" id="GREEN">Green</button>
                         </div>
 
                     </div>
                     <div class="btn-group" role="group">
                         <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Display By Delay:
+                            Display By Wait Time:
                         </button>
-                        <div class="dropdown-menu" id="BART-lines-by-delay" aria-labelledby="btnGroupDrop1">
-                            <button class="dropdown-item" id="YELLOW-Antioch">Yellow - Antioch</button>
-                            <button class="dropdown-item" id="YELLOW-SFO/Millbrae">Yellow - SFO/Millbrae</button>
-                            <button class="dropdown-item" id="RED-Richmond">Red - Richmond</button>
-                            <button class="dropdown-item" id="RED">Red - Richmond</button>
-                            <button class="dropdown-item" id="BLUE-DalyCity">Blue - Daly City</button>
-                            <button class="dropdown-item" id="BLUE">Blue - Dublin/Pleasonton</button>
-                            <button class="dropdown-item" id="ORANGE-Richmond">Orange - Richmond</button>
-                            <button class="dropdown-item" id="ORANGE-Berryessa">Orange - Berryessa</button>
+                        <div class="dropdown-menu" id="BART-lines-by-wait" aria-labelledby="btnGroupDrop1">
+                            <button class="dropdown-item" id="YELLOW-ANTC">Yellow - Antioch</button>
+                            <button class="dropdown-item" id="YELLOW-SFIA">Yellow - SFO/Millbrae</button>
+                            <button class="dropdown-item" id="RED-RICH">Red - Richmond</button>
+                            <button class="dropdown-item" id="RED-MLBR">Red - Millbrae</button>
+                            <button class="dropdown-item" id="BLUE-DALY">Blue - Daly City</button>
+                            <button class="dropdown-item" id="BLUE-DUBL">Blue - Dublin/Pleasonton</button>
+                            <button class="dropdown-item" id="ORANGE-RICH">Orange - Richmond</button>
+                            <button class="dropdown-item" id="ORANGE-BERY">Orange - Berryessa</button>
+                            <button class="dropdown-item" id="GREEN-DALY">Green - Daly City</button>
+                            <button class="dropdown-item" id="GREEN-BERY">Green - Berryessa</button>
                         </div>
                     </div>
                 </div>

@@ -30,7 +30,10 @@
     cursor: pointer;
 }
 
-
+#name {
+    padding-bottom: 0px;
+    margin-bottom: 6px;
+}
 
 #tooltip {
     text-align: left;
