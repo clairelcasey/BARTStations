@@ -46,3 +46,8 @@
     color: black;
     position: absolute;
 }
+
+.BART_System {
+    stroke: darkgrey;
+    stroke-wdith: 3;
+}

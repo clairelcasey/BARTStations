@@ -1,115 +1,15 @@
 "use strict";
 
-const BASE_API_URL = "http://api.bart.gov/api";
-const KEY = "MW9S-E7SL-26DU-VV8V"
-
-
-/* Make a request and return array of BART station data in format: 
-[
-  {
-    name: "12th Street',
-    abbr: "12TH",
-    gtfs_latitude: "37.0343",
-    stfs_longitude: "-122.3434",
-    address: "1245 Broadway, Oakland"
-  }
-  ....
-]
-*/
-async function getStationIds() {
-  const response = await axios({
-    url: `${BASE_API_URL}/stn.aspx`,
-    method: "GET",
-    params: {
-      cmd: "stns",
-      json: "y",
-      key: KEY
-    },
-  });
-  const stations = response.data.root.stations.station;
-  // console.log('stations', stations);
-  return stations;
-}
-const $loading = $('#Loading');
-
-
-/* Given a station abbreviation, return array of estimated time of departures: 
-[
-  {
-    destination: "Antioch',
-    abbr: "ANTC",
-    limited: "0",
-    estimate: [
-      {
-        minutes: "4",
-        platform: "1",
-        direction: "North",
-        length: "10",
-        color: "YELLOW"
-      }
-      ....
-    ]
-    gtfs_latitude: "37.0343",
-    stfs_longitude: "-122.3434",
-    address: "1245 Broadway, Oakland"
-  }, 
-
-    {
-    destination: "SF Airport',
-    abbr: "SFIA",
-    limited: "0",
-    estimate: [
-      {
-        minutes: "10",
-        platform: "1",
-        direction: "South",
-        length: "10",
-        color: "YELLOW"
-      }
-      ....
-    ]
-  }
-  ....
-]
-*/
-async function getDepartureTimes(abbr) {
-  const response = await axios({
-    url: `${BASE_API_URL}/etd.aspx`,
-    method: "GET",
-    params: {
-      cmd: "etd",
-      orig: abbr,
-      key: KEY,
-      json: "y"
-    },
-  });
-  return response.data.root.station[0].etd;
-}
-
-/* Get time of most recent update (the same for all, so it just takes the first 
-  time) */
-
-async function getMostRecentUpdateTime() {
-  const response = await axios({
-    url: `${BASE_API_URL}/etd.aspx`,
-    method: "GET",
-    params: {
-      cmd: "etd",
-      orig: "12TH",
-      key: KEY,
-      json: "y"
-    },
-  });
-  // console.log(response.data.root);
-  return {
-    date: response.data.root.date,
-    time: response.data.root.time
-  }
-}
 
 /* Get list of stations, and for each station get list of future departure 
 times */
+
+// potentially refactor: need to use let because re-binding in 
+// getStationsAndDisplay. Want to keep as global constant, but do easy filter.
 let STATIONS = [];
+
+// TO DO: make a current stations data variable and reset this with filtered
+let CurStationsData = [];
 
 async function getStationsAndDisplay() {
   STATIONS = await getStationIds();
@@ -127,7 +27,7 @@ async function getStationsAndDisplay() {
 }
 
 $(getStationsAndDisplay);
-// $(createMap);
+
 
 /* Given time from GET request, display time in header */
 
@@ -157,17 +57,21 @@ svg.call(d3.zoom()
 
 /* Initialize 2gs = first "g' will hold map paths; circles will hold BART 
 station circles */
-const g = svg.append("g");
-const circles = svg.append("g")
+const mapDat = svg.append("g");
+const BARTDat = svg.append("g");
+const circles = svg.append("g");
+
+/* Create a zoomed function for when map is zoomed in/out */
 
 function zoomed({ transform, d }) {
-  g.attr("transform", transform);
+  mapDat.attr("transform", transform);
   circles.attr("transform", transform);
+  BARTDat.attr("transform", transform);
 }
 
 const projection = d3.geoMercator()
-  .center([-122.4194, 37.7749])
-  .scale(45000)
+  .center([-122.2, 37.7])
+  .scale(40000)
   .translate([320, 320])
 
 const path = d3.geoPath()
@@ -181,7 +85,7 @@ function createMap() {
   d3.json("california-counties@1.topojson").then(function (topology) {
     // console.log(topology);
 
-    g.selectAll(".county")
+    mapDat.selectAll(".county")
       .data(topojson.feature(topology, topology.objects.counties).features)
       .enter()
       .append("path")
@@ -190,7 +94,23 @@ function createMap() {
       .attr("fill", "grey");
   });
 
+  d3.json("BART_System_2020.topojson").then(function (topology) {
+    console.log(topology)
+
+    BARTDat.selectAll(".BART_System")
+      .data(topojson.feature(topology, topology.objects.BART_System_2020).features)
+      .enter()
+      .append("path")
+      .attr("class", "BART_System")
+      .attr("d", path)
+      .attr("stroke", "darkgrey")
+      .attr("fill", "none");
+
+  });
+
   // Create the circles
+  // REFACTOR OPTION: Can some of these if statements/ callbacks be separate 
+  //fns?
   circles.selectAll("BART-circles")
     .data(STATIONS)
     .enter()
@@ -210,7 +130,8 @@ function createMap() {
       d3.select(this)
         .style('opacity', '1')
         .attr("r", 6);
-        // update tooltip
+      // update tooltip
+      // Potential refactor: move some styling to class in CSS?
       d3.select('#name').text(`${d.name} Station`);
       for (let sta of d.etd) {
         d3.select("#etd")
@@ -302,39 +223,7 @@ function updateLine(color) {
 }
 
 
-/* Given a color, update the data to have a "show" element that is true if the 
-BART station is on that Line and false if not. 
-* This uses map rather than filter so that the elements aren't actually 
-removed, just not displayed. 
-This is so the tooltip information and mouse clicks don't need to be re-added. 
-*/
 
-function filterByColor(color) {
-  const stationsFiltered = STATIONS.map(function (sta) {
-    let newSta = JSON.parse(JSON.stringify(sta));
-    let newEtd = [];
-    let showing = null;
-    for (let destination of newSta.etd) {
-      // console.log('destination', destination);
-      // push the destination if it's on the correct line. Using push because 
-      // there are trains going in both directions that share the same color. 
-      if (destination.estimate[0].color === color) {
-        showing = true;
-        newEtd.push(destination);
-      }
-    }
-    // if showing is still null (for this station, there are no trains 
-    // on the line with this color, then set showing to false)
-    if (showing === null) showing = false;
-    newSta.show = showing;
-    // console.log('newETD', newEtd);
-    newSta.etd = newEtd;
-    // console.log('newSta', newSta);
-    return newSta;
-  })
-  console.log(stationsFiltered, 'filtered by color');
-  return stationsFiltered
-}
 
 
 $("#resetBtn").on("click", resetMap);
@@ -382,22 +271,3 @@ function updateLineByWait(color, dirName) {
     });
 }
 
-/* Given a color and direction, filter data based on parameters. */
-
-function filterByColorAndDirection(color, dirName) {
-  const stationsFiltered = STATIONS.map(function (val) {
-    let newVal = JSON.parse(JSON.stringify(val));
-    for (let elem of newVal.etd) {
-      // console.log('elem', elem);
-      if (elem.estimate[0].color === color && elem.abbreviation === dirName) {
-        newVal.show = true;
-        newVal.etd = [elem];
-        return newVal;
-      }
-    }
-    newVal.show = false;
-    return newVal;
-  })
-  console.log(stationsFiltered, 'filtered by color and direction');
-  return stationsFiltered
-}
