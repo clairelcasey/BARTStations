@@ -7,9 +7,8 @@ times */
 // potentially refactor: need to use let because re-binding in 
 // getStationsAndDisplay. Want to keep as global constant, but do easy filter.
 let STATIONS = [];
-
 // TO DO: make a current stations data variable and reset this with filtered
-let CurStationsData = [];
+let CurStationsData = [];;
 
 async function getStationsAndDisplay() {
   STATIONS = await getStationIds();
@@ -24,6 +23,8 @@ async function getStationsAndDisplay() {
   // console.log('times', times);
   displayTimeAndOptions(times);
   createMap();
+  CurStationsData = STATIONS;
+  console.log('CurStationsData is STATIONS', CurStationsData);
 }
 
 $(getStationsAndDisplay);
@@ -184,9 +185,10 @@ only certain lines are showing). */
 
 function updateDelay() {
   showDelay = (showDelay) ? false : true;
+  console.log('updateDelay CurStationsData', CurStationsData);
   if (showDelay) {
     d3.selectAll(".BART-circles")
-      .data(STATIONS)
+      .data(CurStationsData)
       .style("stroke", function (d) {
         return (d.etd.every(val => val.estimate[0].delay === "0")) ? "none" : "red"
       })
@@ -231,6 +233,7 @@ $("#resetBtn").on("click", resetMap);
 /* Reset the map styles when reset button is clicked. */
 
 function resetMap() {
+  CurStationsData = STATIONS;
   d3.selectAll(".BART-circles")
     .data(STATIONS)
     .style("fill", "blue")

@@ -31,7 +31,8 @@ function filterByColor(color) {
     return newSta;
   })
   console.log(stationsFiltered, 'filtered by color');
-  // CurStationsData = stationsFiltered;
+  CurStationsData = stationsFiltered;
+  console.log('CurStationsData is stationsFiltered', CurStationsData);
   return stationsFiltered
 }
 
@@ -52,7 +53,7 @@ function filterByColorAndDirection(color, dirName) {
     newVal.show = false;
     return newVal;
   })
-  console.log(stationsFiltered, 'filtered by color and direction');
-  // CurStationsData = stationsFiltered;
+  console.log('CurStationsData is stationsFiltered', CurStationsData);
+  CurStationsData = stationsFiltered;
   return stationsFiltered
 }
