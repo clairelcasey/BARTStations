@@ -1,6 +1,8 @@
 "use strict";
 
 const BASE_API_URL = "http://api.bart.gov/api";
+// public example key used by BART. To get your own key, go to: 
+// http://api.bart.gov/api/register.aspx
 const KEY = "MW9S-E7SL-26DU-VV8V"
 
 

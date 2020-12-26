@@ -14,17 +14,15 @@ async function getStationsAndDisplay() {
   STATIONS = await getStationIds();
   for (let station of STATIONS) {
     station.etd = await getDepartureTimes(station.abbr);
+    station.show = true;
   }
   // only get stations where there are ETDs
   STATIONS = STATIONS.filter((val) => val.etd);
-  console.log('final stations', STATIONS);
   $loading.hide();
   const times = await getMostRecentUpdateTime();
-  // console.log('times', times);
   displayTimeAndOptions(times);
   createMap();
   CurStationsData = STATIONS;
-  console.log('CurStationsData is STATIONS', CurStationsData);
 }
 
 $(getStationsAndDisplay);
@@ -84,7 +82,6 @@ const path = d3.geoPath()
 function createMap() {
 
   d3.json("california-counties@1.topojson").then(function (topology) {
-    // console.log(topology);
 
     mapDat.selectAll(".county")
       .data(topojson.feature(topology, topology.objects.counties).features)
@@ -96,7 +93,6 @@ function createMap() {
   });
 
   d3.json("BART_System_2020.topojson").then(function (topology) {
-    console.log(topology)
 
     BARTDat.selectAll(".BART_System")
       .data(topojson.feature(topology, topology.objects.BART_System_2020).features)
@@ -165,7 +161,6 @@ function createMap() {
       $("#etd").empty();
       d3.select(this)
         .style('opacity', '0.4')
-      // .style('r', 5);
       d3.select('#tooltip')
         .style("opacity", "0")
         .style("display", "none");
@@ -174,9 +169,15 @@ function createMap() {
 
 
 
-/* Add checkbox updates */
+/* Add event listener to display click */
 let showDelay = false;
-$("#delayCheck").on("click", updateDelay);
+$("#delayCheck").on("click", function(evt) {
+  showDelay = (showDelay) ? false : true;
+  updateDelay();
+  $(this).text(function(i, text) {
+    return text === "Display Delays: On" ? "Display Delays: Off" : "Display Delays: On";
+  })
+});
 
 /* If the delay button is clicked, turn on and off strokes around the circles 
 with delays.
@@ -184,8 +185,7 @@ with delays.
 only certain lines are showing). */
 
 function updateDelay() {
-  showDelay = (showDelay) ? false : true;
-  console.log('updateDelay CurStationsData', CurStationsData);
+
   if (showDelay) {
     d3.selectAll(".BART-circles")
       .data(CurStationsData)
@@ -208,6 +208,7 @@ $("#BART-lines").on("click", ".dropdown-item", function (evt) {
   const $button = $(evt.target);
   const color = $button.attr("id");
   updateLine(color);
+  updateDelay();
 })
 
 /* Given a color, only show BART circles that are on that line (tooltip is not 
@@ -240,6 +241,7 @@ function resetMap() {
     .style("opacity", 0.4)
     .style("r", 5)
     .style("display", "block");
+  updateDelay();
 }
 
 
@@ -249,7 +251,6 @@ color and name they clicked on and run UpdateLineByWait function.*/
 $("#BART-lines-by-wait").on("click", ".dropdown-item", function (evt) {
   const $button = $(evt.target);
   const info = $button.attr("id").split('-');
-  // console.log('info', info);
 
   const color = info[0];//$button.attr("id");
   const name = info[1];
@@ -269,7 +270,6 @@ function updateLineByWait(color, dirName) {
     })
     .style("r", function (d) {
       if (d.etd[0].estimate[0].minutes === "Leaving") return 2;
-      // console.log(d.etd[0].estimate[0].minutes,"d");
       return d.etd[0].estimate[0].minutes;
     });
 }

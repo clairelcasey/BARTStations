@@ -13,7 +13,6 @@ function filterByColor(color) {
     let newEtd = [];
     let showing = null;
     for (let destination of newSta.etd) {
-      // console.log('destination', destination);
       // push the destination if it's on the correct line. Using push because 
       // there are trains going in both directions that share the same color. 
       if (destination.estimate[0].color === color) {
@@ -25,14 +24,10 @@ function filterByColor(color) {
     // on the line with this color, then set showing to false)
     if (showing === null) showing = false;
     newSta.show = showing;
-    // console.log('newETD', newEtd);
     newSta.etd = newEtd;
-    // console.log('newSta', newSta);
     return newSta;
   })
-  console.log(stationsFiltered, 'filtered by color');
   CurStationsData = stationsFiltered;
-  console.log('CurStationsData is stationsFiltered', CurStationsData);
   return stationsFiltered
 }
 
@@ -43,7 +38,6 @@ function filterByColorAndDirection(color, dirName) {
   const stationsFiltered = STATIONS.map(function (val) {
     let newVal = JSON.parse(JSON.stringify(val));
     for (let elem of newVal.etd) {
-      // console.log('elem', elem);
       if (elem.estimate[0].color === color && elem.abbreviation === dirName) {
         newVal.show = true;
         newVal.etd = [elem];
@@ -53,7 +47,6 @@ function filterByColorAndDirection(color, dirName) {
     newVal.show = false;
     return newVal;
   })
-  console.log('CurStationsData is stationsFiltered', CurStationsData);
   CurStationsData = stationsFiltered;
   return stationsFiltered
 }
