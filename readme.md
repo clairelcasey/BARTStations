@@ -1,6 +1,6 @@
-# <img src="./logo.png" alt="drawing" width="40"/> Estimated Time of Restoration Visualization 
+# <img src="./logo.png" alt="drawing" width="40"/> Estimated Departure Time Visualization 
 
-Interactive visualization for Bay Area Rapid Transit (BART) estimated departure times. This project combines my love for programming with my passion for public transportation.
+Interactive visualization for Bay Area Rapid Transit (BART) Estimated Departure Times. This project combines my love for programming with my passion for public transportation.
 
 Users can use the toolbar at the top of the screen to change displays. Display
 options: 
