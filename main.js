@@ -8,7 +8,7 @@ times */
 // getStationsAndDisplay. Want to keep as global constant, but do easy filter.
 let STATIONS = [];
 // TO DO: make a current stations data variable and reset this with filtered
-let CurStationsData = [];;
+let CurStationsData = [];
 
 async function getStationsAndDisplay() {
   STATIONS = await getStationIds();
